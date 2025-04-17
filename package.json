@@ -46,7 +46,8 @@
       "esbuild"
     ],
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "sharp"
     ]
   }
 }

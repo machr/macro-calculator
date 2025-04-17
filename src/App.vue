@@ -52,6 +52,42 @@ const bodyCompositionTdee = computed(() => ({
   maintenance: tdee.value,
   weightGain: tdee.value + 500,
 }))
+
+// Macronutrient calculations
+const proteinPerKg = ref<number>(1.8)
+const fatPerKg = ref<number>(1.0)
+const carbsPerKg = ref<number>(3.5)
+
+const macros = computed(() => {
+  const proteinGrams = Math.round(weight.value * proteinPerKg.value)
+  const fatGrams = Math.round(weight.value * fatPerKg.value)
+  const carbsGrams = Math.round(weight.value * carbsPerKg.value)
+
+  const proteinCalories = proteinGrams * 4
+  const fatCalories = fatGrams * 9
+  const carbsCalories = carbsGrams * 4
+
+  const totalCalories = proteinCalories + fatCalories + carbsCalories
+
+  return {
+    protein: {
+      grams: proteinGrams,
+      calories: proteinCalories,
+      percentage: Math.round((proteinCalories / totalCalories) * 100),
+    },
+    fat: {
+      grams: fatGrams,
+      calories: fatCalories,
+      percentage: Math.round((fatCalories / totalCalories) * 100),
+    },
+    carbs: {
+      grams: carbsGrams,
+      calories: carbsCalories,
+      percentage: Math.round((carbsCalories / totalCalories) * 100),
+    },
+    totalCalories,
+  }
+})
 </script>
 
 <template>
@@ -197,6 +233,120 @@ const bodyCompositionTdee = computed(() => ({
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Macronutrient Calculator Section -->
+          <div class="overflow-x-auto bg-gray-50 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Macronutrient Calculator</h3>
+
+            <div class="space-y-6">
+              <!-- Protein -->
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="text-gray-700">Protein (g/kg)</label>
+                  <span class="text-sm text-gray-500">Recommended: 1.6-2.2g/kg</span>
+                </div>
+                <input
+                  v-model.number="proteinPerKg"
+                  type="range"
+                  min="1.6"
+                  max="2.2"
+                  step="0.1"
+                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div class="flex justify-between text-sm text-gray-500 mt-1">
+                  <span>1.6g</span>
+                  <span>{{ proteinPerKg.toFixed(1) }}g</span>
+                  <span>2.2g</span>
+                </div>
+              </div>
+
+              <!-- Fat -->
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="text-gray-700">Fat (g/kg)</label>
+                  <span class="text-sm text-gray-500">Recommended: 0.8-1.2g/kg</span>
+                </div>
+                <input
+                  v-model.number="fatPerKg"
+                  type="range"
+                  min="0.8"
+                  max="1.2"
+                  step="0.1"
+                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div class="flex justify-between text-sm text-gray-500 mt-1">
+                  <span>0.8g</span>
+                  <span>{{ fatPerKg.toFixed(1) }}g</span>
+                  <span>1.2g</span>
+                </div>
+              </div>
+
+              <!-- Carbs -->
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="text-gray-700">Carbohydrates (g/kg)</label>
+                  <span class="text-sm text-gray-500">Recommended: 3-5g/kg</span>
+                </div>
+                <input
+                  v-model.number="carbsPerKg"
+                  type="range"
+                  min="3"
+                  max="5"
+                  step="0.1"
+                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div class="flex justify-between text-sm text-gray-500 mt-1">
+                  <span>3g</span>
+                  <span>{{ carbsPerKg.toFixed(1) }}g</span>
+                  <span>5g</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="mt-6">
+              <table class="min-w-full table-auto">
+                <thead>
+                  <tr class="border-b border-gray-200">
+                    <th class="py-3 px-4 text-left font-semibold text-gray-700">Macro</th>
+                    <th class="py-3 px-4 text-right font-semibold text-gray-700">Grams</th>
+                    <th class="py-3 px-4 text-right font-semibold text-gray-700">Calories</th>
+                    <th class="py-3 px-4 text-right font-semibold text-gray-700">%</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="py-3 px-4 text-gray-600">Protein</td>
+                    <td class="py-3 px-4 text-right">{{ macros.protein.grams }}g</td>
+                    <td class="py-3 px-4 text-right">{{ macros.protein.calories }} kcal</td>
+                    <td class="py-3 px-4 text-right">{{ macros.protein.percentage }}%</td>
+                  </tr>
+                  <tr>
+                    <td class="py-3 px-4 text-gray-600">Fat</td>
+                    <td class="py-3 px-4 text-right">{{ macros.fat.grams }}g</td>
+                    <td class="py-3 px-4 text-right">{{ macros.fat.calories }} kcal</td>
+                    <td class="py-3 px-4 text-right">{{ macros.fat.percentage }}%</td>
+                  </tr>
+                  <tr>
+                    <td class="py-3 px-4 text-gray-600">Carbohydrates</td>
+                    <td class="py-3 px-4 text-right">{{ macros.carbs.grams }}g</td>
+                    <td class="py-3 px-4 text-right">{{ macros.carbs.calories }} kcal</td>
+                    <td class="py-3 px-4 text-right">{{ macros.carbs.percentage }}%</td>
+                  </tr>
+                  <tr class="border-t border-gray-200">
+                    <td class="py-3 px-4 font-semibold text-gray-700">Total</td>
+                    <td class="py-3 px-4 text-right">
+                      {{ macros.protein.grams + macros.fat.grams + macros.carbs.grams }}g
+                    </td>
+                    <td class="py-3 px-4 text-right font-semibold">
+                      {{ macros.totalCalories }} kcal
+                    </td>
+                    <td class="py-3 px-4 text-right">100%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
